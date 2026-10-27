@@ -33,14 +33,25 @@ d(1,:) = u(1,:)-u(rows,:);
 end
 
 
-function [xs,ys] = shrink2isotropic(x,y,lambda) 
-s = sqrt(x.^2 + y.^2);
-% xs = max(0, s-lambda).*x./s;
-% ys = max(0, s-lambda).*y./s;
-xs = sign(x).*max(0, s-lambda);
-ys = sign(y).*max(0, s-lambda);
-end
+% function [xs,ys] = shrink2isotropic(x,y,lambda) 
+% s = sqrt(x.^2 + y.^2);
+% % xs = max(0, s-lambda).*x./s;
+% % ys = max(0, s-lambda).*y./s;
+% xs = sign(x).*max(0, s-lambda);
+% ys = sign(y).*max(0, s-lambda);
+% end
 
+function [xs, ys] = shrink2isotropic(x, y, lambda)
+% Proximal operator of lambda * ||(x,y)||_2 at each pixel.
+% Assumes lambda >= 0.
+    s = sqrt(x.^2 + y.^2);
+    scale = zeros(size(s), 'like', s);
+    idx = (s > lambda);
+    % Avoid division by zero.
+    scale(idx) = 1 - lambda ./ s(idx);
+    xs = scale .* x;
+    ys = scale .* y;
+end
 
 function f = FFTsolutionofL2norm(dx,dy,v,lambda)
 %the solution of min{1/2int(gradient u-d)^2+lambda/2int(u-v)^2}
